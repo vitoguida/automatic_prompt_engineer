@@ -1,0 +1,2 @@
+Test score: 0.01
+Prompt: The instruction was to provide the antonym of each input word.

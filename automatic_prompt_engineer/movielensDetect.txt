@@ -1,0 +1,10 @@
+Test score: 0.15
+Prompt: Based on the provided input-output pairs, it seems that the instruction was to generate a specific format for movie information based on a given input number. Each output consists of a movie identifier followed by the movie title, release year, and genre(s). 
+
+The format appears to be:
+```
+Input: [number]::
+Output: [number]::[Movie Title] ([Year]) ::[Genre1|Genre2|...]
+```
+
+Your friend is likely tasked with retrieving or constructing this movie information based on the input number you provided. If you would like to specify a particular input number, I can help you format a corresponding output based on the same criteria.
