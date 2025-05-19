@@ -13,8 +13,7 @@ openai.api_base = "https://dipalma3.openai.azure.com/"
 openai.api_version = "2024-05-01-preview"
 #openai.api_version = "2025-01-01-preview"
 #openai.api_version = "2025-03-01-preview"
-"""qui mettere la chiave altrimenti git non fa pushare per sicurezza
-#openai . api_key = """""
+openai.api_key = "AwolEQa4meMsTnyA3VzuIGBF8uhLjKyDcl7I3wyTHQoBwngTFEyRJQQJ99ALAC5RqLJXJ3w3AAABACOGn5Zm"
 deployment_name = "gpt-4o-mini"
 
 
@@ -112,6 +111,11 @@ class GPT_Forward(LLM):
 
         for prompt_batch in tqdm(prompt_batches, disable=self.disable_tqdm):
             text += self.auto_reduce_n(self.__generate_text, prompt_batch, n)
+        return text
+
+    def evaluate_best_prompt(self, prompt, n):
+        text = ""
+        text = self.auto_reduce_n(self.__generate_text, prompt, n)
         return text
 
     def complete(self, prompt, n):

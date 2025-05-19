@@ -30,7 +30,7 @@ def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, f
 
     # Instantiate the LLM
     model = llm.model_from_config(config['model'])
-    model_outputs = model.generate_text(queries, config['num_samples']) #ho modificato prima c'era 1
+    model_outputs = model.generate_text(queries, config['num_samples_2']) #ho modificato prima c'era 1
 
     task = config['task']
     metric = utility.TASK_TO_METRIC.get(task, utility.default_metric)
@@ -45,6 +45,8 @@ def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, f
         score_fn = utility.get_multi_answer_contains
     elif metric == 'em':
         score_fn = utility.get_multi_answer_em
+    elif metric == 'em_modified':
+        score_fn = utility.get_multi_answer_em_modified
 
     scores = []
     for prediction, ans_ in zip(model_outputs, answers):

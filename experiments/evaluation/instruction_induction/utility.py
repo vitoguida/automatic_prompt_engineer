@@ -7,7 +7,7 @@ import string
 from collections import Counter
 
 TASK_TO_METRIC = {'common_concept': 'f1', 'informal_to_formal': 'f1', 'orthography_starts_with': 'es',
-                  'taxonomy_animal': 'es', 'synonyms': 'contains'}
+                  'taxonomy_animal': 'es', 'synonyms': 'contains', 'movieTest': 'contains'}
 default_metric = 'em'
 
 
@@ -74,6 +74,11 @@ def get_multi_answer_em(prediction, answers):
             return 1
     return 0
 
+def get_multi_answer_em_modified(prediction, answer):
+    if get_em_score(prediction, answer) == 1:
+        return 1
+    return 0
+
 
 def get_multi_answer_f1(prediction, answers):
     f1_scores = []
@@ -89,8 +94,7 @@ def get_multi_answer_exact_set(prediction, answers):
     return 0
 
 
-def get_multi_answer_contains(prediction, answers):
-    for answer in answers:
-        if get_contains_score(prediction, answer) == 1:
-            return 1
+def get_multi_answer_contains(prediction, answer):
+    if get_contains_score(prediction, answer) == 1:
+        return 1
     return 0

@@ -5,7 +5,9 @@ import fire
 from automatic_prompt_engineer import ape, data
 from experiments.data.instruction_induction.load_data import load_data, tasks
 from experiments.evaluation.instruction_induction.exec_accuracy import exec_accuracy_evaluator
-
+from llm import GPT_Forward, model_from_config
+from experiments.evaluation.instruction_induction import utility
+import config
 
 
 def run():
@@ -66,6 +68,7 @@ def run():
             'method': exec_accuracy_evaluator,
             'task': 'movietesttask',
             'num_samples': min(20, len(eval_data[0])),
+            'num_samples_2': min(20, len(eval_data[0])),
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
@@ -105,12 +108,14 @@ def run():
         },
         'evaluation': {
             'method': exec_accuracy_evaluator,
-            'task': 'movietesttask',
+            'task': 'movieTest',
             'num_samples': min(100, len(test_data[0])),
+            'num_samples_2': 1,
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
-                }
+                },
+                'batch_size': 1
             }
         }
     }
@@ -130,6 +135,26 @@ def run():
     with open('movielensDetect.txt', 'w') as f:
         f.write(f'Test score: {test_score}\n')
         f.write(f'Prompt: {prompts[0]}\n')
+
+    #value = evaluate_prompt(prompts[0], test_film, conf, base_config)
+
+    #print(f'{value}/{len(test_film)}')
+
+def evaluate_prompt(prompt, answers, conf, base_conf):
+    configuration = config.update_config(conf, base_conf)
+    model = model_from_config(configuration['evaluation']['model'])
+    model_outputs = ""
+    model_outputs = model.evaluate_best_prompt(prompt, 1)
+
+    score_fn = utility.get_multi_answer_em
+    value = 0
+    for prediction, ans_ in zip(model_outputs, answers):
+        score = score_fn(prediction, ans_)
+        value += 1
+
+    return value
+
+
 
 
 if __name__ == '__main__':
