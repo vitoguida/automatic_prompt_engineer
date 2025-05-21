@@ -13,7 +13,7 @@ openai.api_base = "https://dipalma3.openai.azure.com/"
 openai.api_version = "2024-05-01-preview"
 #openai.api_version = "2025-01-01-preview"
 #openai.api_version = "2025-03-01-preview"
-openai.api_key = "AwolEQa4meMsTnyA3VzuIGBF8uhLjKyDcl7I3wyTHQoBwngTFEyRJQQJ99ALAC5RqLJXJ3w3AAABACOGn5Zm"
+openai.api_key = ""
 deployment_name = "gpt-4o-mini"
 
 
