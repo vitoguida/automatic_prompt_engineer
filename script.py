@@ -4,7 +4,7 @@ import openai
 openai.api_type = "azure"
 openai.api_base = "https://dipalma3.openai.azure.com/"
 openai.api_version = "2024-05-01-preview"  # Assicurati che sia compatibile col tuo deployment
-openai.api_key = "AwolEQa4meMsTnyA3VzuIGBF8uhLjKyDcl7I3wyTHQoBwngTFEyRJQQJ99ALAC5RqLJXJ3w3AAABACOGn5Zm"  # Sostituisci con la tua chiave reale
+openai.api_key = ""  # Sostituisci con la tua chiave reale
 
 # Nome del deployment che hai creato su Azure (non il modello, ma il nome che gli hai dato tu)
 deployment_name = "gpt-4o-mini"  # Adatta a quello che hai realmente

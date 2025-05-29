@@ -26,7 +26,7 @@ gpt_costs_per_thousand = {
 }
 
 # Set API key
-genai.configure(api_key="")
+genai.configure(api_key="AIzaSyBpq7djfvlT_v9p-0TmCUa1EdyrtYe7-AM")
 
 
 
@@ -37,9 +37,11 @@ def model_from_config(config, disable_tqdm=True):
         return GPT_Forward(config, disable_tqdm=disable_tqdm)
     elif model_type == "GPT_insert":
         return GPT_Insert(config, disable_tqdm=disable_tqdm)
-    elif model_type == "gemini":
-        return gemini(config, disable_tqdm= disable_tqdm)
+    elif model_type == "GeminiForward":
+        return GeminiForward(config, disable_tqdm= disable_tqdm)
     raise ValueError(f"Unknown model type: {model_type}")
+
+
 
 
 class LLM(ABC):
@@ -55,7 +57,7 @@ class LLM(ABC):
         """
         pass
 
-    @abstractmethod
+
     def log_probs(self, text, log_prob_range):
         """Returns the log probs of the text.
         Parameters:
@@ -66,6 +68,33 @@ class LLM(ABC):
             A list of log probs.
         """
         pass
+
+class GeminiForward(LLM):
+    """Wrapper for Gemini model."""
+
+    def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
+        self.config = config
+        self.needs_confirmation = needs_confirmation
+        self.disable_tqdm = disable_tqdm
+        self.model = genai.GenerativeModel(model_name="gemini-2.0-flash")
+
+    def generate_text(self, prompt, n=1):
+        if not isinstance(prompt, list):
+            prompt = [prompt]
+        # Pulisce eventuali [APE] token
+        for i in range(len(prompt)):
+            prompt[i] = prompt[i].replace('[APE]', '').strip()
+
+        results = []
+        for p in tqdm(prompt, disable=self.disable_tqdm):
+            for _ in range(n):
+                try:
+                    response = self.model.generate_content(p)
+                    results.append(response.text)
+                except Exception as e:
+                    print(f"Error with prompt: {p}\n{e}")
+                    results.append("")
+                    time.sleep
 
 
 class GPT_Forward(LLM):
