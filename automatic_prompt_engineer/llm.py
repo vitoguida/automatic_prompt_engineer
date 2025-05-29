@@ -6,6 +6,7 @@ from tqdm import tqdm
 from abc import ABC, abstractmethod
 
 import openai
+import google.generativeai as genai
 
 openai.api_type = "azure"
 #openai.api_base = "https://dipalma3.openai.azure.com/%22"
@@ -16,9 +17,6 @@ openai.api_version = "2024-05-01-preview"
 openai.api_key = ""
 deployment_name = "gpt-4o-mini"
 
-
-
-
 gpt_costs_per_thousand = {
     'davinci': 0.0200,
     'curie': 0.0020,
@@ -26,6 +24,9 @@ gpt_costs_per_thousand = {
     'ada': 0.0004,
     'GPT-4o-mini' : 0.005
 }
+
+# Set API key
+genai.configure(api_key="")
 
 
 def model_from_config(config, disable_tqdm=True):
@@ -35,6 +36,8 @@ def model_from_config(config, disable_tqdm=True):
         return GPT_Forward(config, disable_tqdm=disable_tqdm)
     elif model_type == "GPT_insert":
         return GPT_Insert(config, disable_tqdm=disable_tqdm)
+    elif model_type == "gemini":
+        return gemini(config, disable_tqdm= disable_tqdm)
     raise ValueError(f"Unknown model type: {model_type}")
 
 
