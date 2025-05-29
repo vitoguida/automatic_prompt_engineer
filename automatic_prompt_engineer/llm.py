@@ -14,6 +14,7 @@ openai.api_base = "https://dipalma3.openai.azure.com/"
 openai.api_version = "2024-05-01-preview"
 openai.api_key = ""
 
+
 deployment_name = "gpt-4o-mini"
 
 gpt_costs_per_thousand = {
