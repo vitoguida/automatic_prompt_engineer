@@ -29,6 +29,7 @@ gpt_costs_per_thousand = {
 genai.configure(api_key="")
 
 
+
 def model_from_config(config, disable_tqdm=True):
     """Returns a model based on the config."""
     model_type = config["name"]
