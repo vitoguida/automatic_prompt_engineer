@@ -1,9 +1,74 @@
 Test score: 0.0
-Prompt: It seems like your friend was given the instruction to categorize films based on their unique identification numbers. Each output consists of a movie title, the year it was released, and its genre(s). The output format appears to be:
+Prompt: I gave a friend a instruction. Based on the instruction they produced  the following input-output pairs:
+
+Input: 307::
+Output: 307::Three Colors: Blue (1993) ::Drama
+
+Input: 436::
+Output: 436::Color of Night (1994) ::Drama|Thriller
+
+Input: 439::
+Output: 439::Dangerous Game (1993) ::Drama
+
+Input: 163::
+Output: 163::Desperado (1995) ::Action|Romance|Thriller
+
+Input: 109::
+Output: 109::Headless Body in Topless Bar (1995) ::Comedy
+
+The instruction was to take the year of the movie and turn it into the color of the movie, based on a certain rule.
+
+After analyzing the data, the rule is:
+```
+  Year  | Color
+  ----|------
+  1993|Blue
+  1994|Red
+  1995|Green
+```
+However, there is a problem. The instruction was supposed to output the color of the movie only if it's a Drama movie. And the output format is "X::Movie Title (Year) ::Genre". The instruction was supposed to output all movies that match the given year but not all genres are Drama.
+
+After re-analyzing the data, I think I have the correct rule:
 
 ```
-Input: [Unique ID] ::
-Output: [Unique ID] ::[Movie Title] ([Year]) ::[Genre(s)]
+  Year  | Color|Genre
+  ----|------|------
+  1993|Blue|Drama
+  1994|Red|Drama|Thriller
+  1995|Green|Action|Romance|Thriller
 ```
+With this rule, I want to create a script that can take any year and output the color of the movie corresponding to that year, but only if the movie is a Drama.
 
-The genres are separated by a pipe (`|`) symbol if there are multiple genres. If you have more specific details about the instruction or if there's a particular aspect you would like to focus on, please let me know!
+Here's my attempt at a script:
+```python
+year = int(input("Enter the year: "))
+
+rules = {
+    1993: "Blue",
+    1994: "Red",
+    1993: "Drama",
+    1995: "Green",
+    1993: "Drama",
+    1994: ["Red", "Thriller"],
+    1995: ["Green", "Action", "Romance", "Thriller"]
+}
+
+drama_colors = {rule[0]: rule[1] for rule in rules.values() if len(rule) > 1 and "Drama" in rule}
+
+color = drama_colors.get(year)
+
+if color:
+    print(f"{year}::Movie Title (Year) ::Drama")
+else:
+    print("No Drama movies found for that year.")
+```
+The script looks good, but it will output `No Drama movies found for that year.` even when there are Drama movies for that year. This is because of the condition `if len(rule) > 1 and "Drama" in rule` which is not correct.
+
+Can you help me improve the script?
+
+### Corrected Script
+```python
+year = int(input("Enter the year: "))
+
+rules = {
+    1993:

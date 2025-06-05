@@ -4,9 +4,16 @@ import os
 import time
 from tqdm import tqdm
 from abc import ABC, abstractmethod
-
+from abc import ABC, abstractmethod
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+import torch
 import openai
 import google.generativeai as genai
+
+print(torch.cuda.is_available())
+print(torch.cuda.device_count())
+print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU")
+
 
 openai.api_type = "azure"
 #openai.api_base = "https://dipalma3.openai.azure.com/%22"
@@ -26,7 +33,18 @@ gpt_costs_per_thousand = {
 }
 
 # Set API key
-genai.configure(api_key="AIzaSyBpq7djfvlT_v9p-0TmCUa1EdyrtYe7-AM")
+#genai.configure(api_key="AIzaSyBpq7djfvlT_v9p-0TmCUa1EdyrtYe7-AM")
+
+keys = {
+    "api_keys": [
+        "AIzaSyBpq7djfvlT_v9p-0TmCUa1EdyrtYe7-AM",
+        "AIzaSyAqPoRXEZILgehqs7wbS6ZWvCn1o_GN5Ds",
+        "AIzaSyBZ1Ww55Anz3wLsoVo1RVaAdzEo-IwB_0E",
+        "AIzaSyDO4D0FET1keJJhYposcw8z4geSm_q_zQY",
+        "AIzaSyCdrR0mYx84kQbhcQndyScVi2o26YcEzPw",
+        "AIzaSyA5QXaafhU7zkD0faeVMWgz_D9FJto5Ts0",
+    ]
+}
 
 
 
@@ -39,9 +57,9 @@ def model_from_config(config, disable_tqdm=True):
         return GPT_Insert(config, disable_tqdm=disable_tqdm)
     elif model_type == "GeminiForward":
         return GeminiForward(config, disable_tqdm= disable_tqdm)
+    elif model_type == "LocalLlama":
+        return LocalLlama(config, disable_tqdm=disable_tqdm)
     raise ValueError(f"Unknown model type: {model_type}")
-
-
 
 
 class LLM(ABC):
@@ -69,32 +87,162 @@ class LLM(ABC):
         """
         pass
 
-class GeminiForward(LLM):
-    """Wrapper for Gemini model."""
+class BatchSizeException(Exception):
+    pass
 
+class LocalLlama:
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
         self.config = config
         self.needs_confirmation = needs_confirmation
         self.disable_tqdm = disable_tqdm
+
+        model_name = config["gpt_config"]["model"]
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32)
+        self.model.eval()
+        if torch.cuda.is_available():
+            self.model.to("cuda")
+
+    def confirm_cost(self, texts, n, max_tokens):
+        print("⚠️ Estimating cost: Not supported for Hugging Face models. Skipping confirmation.")
+
+    def auto_reduce_n(self, fn, prompt, n):
+        try:
+            return fn(prompt, n)
+        except BatchSizeException as e:
+            if n == 1:
+                raise e
+            return self.auto_reduce_n(fn, prompt, n // 2) + self.auto_reduce_n(fn, prompt, n // 2)
+
+    def generate_text(self, prompt, n):
+        if not isinstance(prompt, list):
+            prompt = [prompt]
+
+        if self.needs_confirmation:
+            self.confirm_cost(prompt, n, self.config['gpt_config']['max_tokens'])
+
+        batch_size = self.config['batch_size']
+        prompt_batches = [prompt[i:i + batch_size] for i in range(0, len(prompt), batch_size)]
+        results = []
+
+        for prompt_batch in tqdm(prompt_batches, disable=self.disable_tqdm):
+            results += self.auto_reduce_n(self.__generate_text, prompt_batch, n)
+
+        return results
+
+    def __generate_text(self, prompts, n):
+        results = []
+        # Pulisce eventuali [APE] token
+        for i in range(len(prompts)):
+            prompts[i] = prompts[i].replace('[APE]', '').strip()
+
+        for prompt in prompts:
+            input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids
+            if torch.cuda.is_available():
+                input_ids = input_ids.to("cuda")
+
+            with torch.no_grad():
+                output = self.model.generate(
+                    input_ids,
+                    do_sample=True,
+                    max_new_tokens=self.config["gpt_config"]["max_tokens"],
+                    top_p=0.9,
+                    num_return_sequences=n,
+                    temperature=self.config["gpt_config"].get("temperature", 0.7)
+                )
+
+            texts = self.tokenizer.batch_decode(output, skip_special_tokens=True)
+            results.extend(texts)
+        return results
+
+    def complete(self, prompt, n):
+        return self.generate_text(prompt, n)
+
+    def log_probs(self, texts, log_prob_range=None):
+        if not isinstance(texts, list):
+            texts = [texts]
+
+        log_probs = []
+        tokens_out = []
+
+        for text in texts:
+            enc = self.tokenizer(text, return_tensors="pt", add_special_tokens=False)
+            input_ids = enc.input_ids
+            if torch.cuda.is_available():
+                input_ids = input_ids.to("cuda")
+
+            with torch.no_grad():
+                outputs = self.model(input_ids)
+                logits = outputs.logits
+
+            probs = torch.nn.functional.log_softmax(logits, dim=-1)
+            input_token_logprobs = probs[0, :-1, :].gather(1, input_ids[:, 1:].unsqueeze(-1)).squeeze(-1)
+            input_token_ids = input_ids[0, 1:]
+            tokens = [self.tokenizer.decode([tok]) for tok in input_token_ids]
+
+            log_probs.append(input_token_logprobs.tolist())
+            tokens_out.append(tokens)
+
+        return log_probs, tokens_out
+
+    def get_token_indices(self, offsets, log_prob_range):
+        # Placeholder: Hugging Face models don’t provide offset mappings for decoding
+        return 0, len(offsets)
+
+
+class GeminiForward(LLM):
+    """Wrapper for Gemini model using multiple API keys sequentially."""
+
+    def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
+        self.config = config
+        self.api_keys = keys.get("api_keys", [])
+        if not self.api_keys:
+            raise ValueError("No API keys provided in config under 'api_keys'")
+        self.key_index = 0
+        self.needs_confirmation = needs_confirmation
+        self.disable_tqdm = disable_tqdm
+
+        # Set the first API key
+        genai.configure(api_key=self.api_keys[self.key_index])
+        self.model = genai.GenerativeModel(model_name="gemini-2.0-flash")
+
+    def _switch_key(self):
+        self.key_index += 1
+        if self.key_index >= len(self.api_keys):
+            raise RuntimeError("All API keys exhausted.")
+        print(f"Switching to next API key: {self.key_index + 1}/{len(self.api_keys)}")
+        genai.configure(api_key=self.api_keys[self.key_index])
         self.model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 
     def generate_text(self, prompt, n=1):
         if not isinstance(prompt, list):
             prompt = [prompt]
-        # Pulisce eventuali [APE] token
+
         for i in range(len(prompt)):
             prompt[i] = prompt[i].replace('[APE]', '').strip()
 
         results = []
         for p in tqdm(prompt, disable=self.disable_tqdm):
             for _ in range(n):
-                try:
-                    response = self.model.generate_content(p)
-                    results.append(response.text)
-                except Exception as e:
-                    print(f"Error with prompt: {p}\n{e}")
-                    results.append("")
-                    time.sleep
+                while True:
+                    try:
+                        response = self.model.generate_content(p)
+                        results.append(response.text)
+                        break  # Success
+                    except Exception as e:
+                        error_msg = str(e)
+                        print(f"Error with prompt: {p}\n{error_msg}")
+                        if "quota" in error_msg.lower() or "exceeded" in error_msg.lower():
+                            try:
+                                self._switch_key()
+                            except RuntimeError as final_error:
+                                print(str(final_error))
+                                results.append("")
+                                break
+                        else:
+                            results.append("")
+                            break
+        return results
 
 
 class GPT_Forward(LLM):
