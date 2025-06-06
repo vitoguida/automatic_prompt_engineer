@@ -57,7 +57,7 @@ def run():
         'generation': {
             'num_subsamples': 3,
             'num_demos': 5,
-            'num_prompts_per_subsample': 30,
+            'num_prompts_per_subsample': 3,
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
@@ -67,8 +67,8 @@ def run():
         'evaluation': {
             'method': exec_accuracy_evaluator,
             'task': 'movietesttask',
-            'num_samples': min(20, len(eval_data[0])),
-            'num_samples_2': min(20, len(eval_data[0])),
+            'num_samples': min(2, len(eval_data[0])),
+            'num_samples_2': min(2, len(eval_data[0])),
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
@@ -99,7 +99,7 @@ def run():
         'generation': {
             'num_subsamples': 3,
             'num_demos': 5,
-            'num_prompts_per_subsample': 30,
+            'num_prompts_per_subsample': 3,
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
@@ -109,7 +109,7 @@ def run():
         'evaluation': {
             'method': exec_accuracy_evaluator,
             'task': 'movieTest',
-            'num_samples': min(100, len(test_data[0])),
+            'num_samples': min(2, len(test_data[0])),
             'num_samples_2': 1,
             'model': {
                 'gpt_config': {
