@@ -61,10 +61,9 @@ def get_exact_set_score(prediction, ground_truth):
 
 
 def get_contains_score(prediction, ground_truth):
-    prediction_normalized = normalize_prediction(prediction, lowercase=True)
-    ground_truth_normalized = normalize_prediction(
-        ground_truth, lowercase=True)
-    if re.search(r'\b({0})\b'.format(ground_truth_normalized), prediction_normalized):
+    #prediction_normalized = normalize_prediction(prediction, lowercase=True)
+    #ground_truth_normalized = normalize_prediction(ground_truth, lowercase=True)
+    if re.search(r'\b({0})\b'.format(ground_truth), prediction):
         return 1
 
 
@@ -95,6 +94,12 @@ def get_multi_answer_exact_set(prediction, answers):
 
 
 def get_multi_answer_contains(prediction, answer):
+    answer = answer.lower()
+    prediction = prediction.lower()
+    prediction = prediction.replace(' ::', '::')
+    prediction = prediction.replace(':: ', '::')
+    prediction = prediction.replace('\n', ' ')
+
     if get_contains_score(prediction, answer) == 1:
         return 1
     return 0

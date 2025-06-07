@@ -55,9 +55,9 @@ def run():
     base_config = '../experiments/configs/instruction_induction.yaml'
     conf = {
         'generation': {
-            'num_subsamples': 3,
+            'num_subsamples': 2,
             'num_demos': 5,
-            'num_prompts_per_subsample': 3,
+            'num_prompts_per_subsample': 2,
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
@@ -97,9 +97,9 @@ def run():
 
     test_conf = {
         'generation': {
-            'num_subsamples': 3,
+            'num_subsamples': 2,
             'num_demos': 5,
-            'num_prompts_per_subsample': 3,
+            'num_prompts_per_subsample': 2,
             'model': {
                 'gpt_config': {
                     # 'model': 'text-ada-001'
@@ -109,7 +109,7 @@ def run():
         'evaluation': {
             'method': exec_accuracy_evaluator,
             'task': 'movieTest',
-            'num_samples': min(2, len(test_data[0])),
+            'num_samples': min(50, len(test_data[0])),
             'num_samples_2': 1,
             'model': {
                 'gpt_config': {
