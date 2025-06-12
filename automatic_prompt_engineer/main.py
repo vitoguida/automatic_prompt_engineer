@@ -16,7 +16,7 @@ def run():
 
     with open('dataset/movies.dat', 'r', encoding='latin-1') as file:
         for i, line in enumerate(file):
-            if i >= 1000:
+            if i >= 3000:
                 break  # Ferma dopo la riga 199 (cioè la riga n. 200)
             line = line.strip()
             if line:
@@ -26,10 +26,10 @@ def run():
                     film.append(f"{movie_id}::{title} ::{genres}")
                     idFilm.append(f"{movie_id}::")
 
-    test_idFilm = idFilm[499:]
-    idFilm = idFilm[:499]
-    test_film = film[499:]
-    film = film[:499]
+    test_idFilm = idFilm[1499:]
+    idFilm = idFilm[:1499]
+    test_film = film[1499:]
+    film = film[:1499]
 
     induce_data = (idFilm, film)
     test_data = (test_idFilm, test_film)
@@ -47,8 +47,20 @@ def run():
                                            #for output in prompt_gen_data[1]]
 
     eval_template = "Instruction: [PROMPT]\n\nInput: [INPUT]\nOutput: [OUTPUT]"
-    prompt_gen_template = "I gave a friend a instruction. Based on the instruction they produced  " \
-                          "the following input-output pairs:\n\n[full_DEMO]\n\nThe instruction was to [APE]"
+    #prompt_gen_template = "I gave a friend a instruction. Based on the instruction they produced  " \
+                          #"the following input-output pairs:\n\n[full_DEMO]\n\nThe instruction was to [APE]"
+    prompt_gen_template = (
+        "I gave a friend an instruction. Based on the instruction they produced the following input-output pairs:\n\n"
+        "[full_DEMO]\n\n"
+        "The instruction was to process input-output pairs where:\n"
+        "- Each input consists of an integer ID followed by movie information in the format 'ID::Movie Title (Year)::Genre'\n"
+        "- The output must be formatted to be compatible with a movie database import system.\n\n"
+        "Additional constraints:\n"
+        "- The output format should be: 'ID::Movie Title (Year) ::Genre'\n\n"
+        "This instruction allows transforming structured movie data into a cleaner format for further processing.\n\n"
+        "The instruction was to [APE]"
+    )
+
     #prompt_gen_template = """you are the movielens1M dataset , i will give to you a lookup key 'MovieID' and you will provide to me more info about the item:\n\n[full_DEMO]\n\nThe instruction was to [APE]"""
     demos_template = "Input: [INPUT]\nOutput: [OUTPUT]"
 
@@ -109,7 +121,7 @@ def run():
         'evaluation': {
             'method': exec_accuracy_evaluator,
             'task': 'movieTest',
-            'num_samples': min(50, len(test_data[0])),
+            'num_samples': min(2, len(test_data[0])),
             'num_samples_2': 1,
             'model': {
                 'gpt_config': {
@@ -132,9 +144,13 @@ def run():
     print(f'Test score: {test_score}')
 
     # Save a text file to experiments/results/instruction_induction/task.txt with the best prompt and test score
-    with open('movielensDetect.txt', 'w') as f:
+    with open('movielensDetect.txt', 'a') as f:
+        f.write(f'----------------------------------------------------------------------')
         f.write(f'Test score: {test_score}\n')
-        f.write(f'Prompt: {prompts[0]}\n')
+        f.write(f'conf: {conf}\n')
+        f.write(f'test_conf: {test_conf}\n')
+        f.write(f'Prompt: {prompts[0]}\n\n\n\n\n')
+
 
     #value = evaluate_prompt(prompts[0], test_film, conf, base_config)
 
