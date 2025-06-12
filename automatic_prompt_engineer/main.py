@@ -144,6 +144,9 @@ def run():
     print(f'Test score: {test_score}')
 
     # Save a text file to experiments/results/instruction_induction/task.txt with the best prompt and test score
+    #Llama-3-1-Nemotron-Nano-8B-v1
+    #Phi-4-reasoning-plus
+    #gemma-3-12b-it
     with open('movielensDetect.txt', 'a') as f:
         f.write(f'----------------------------------------------------------------------')
         f.write(f'Test score: {test_score}\n')
