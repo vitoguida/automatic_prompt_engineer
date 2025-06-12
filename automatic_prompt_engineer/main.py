@@ -121,7 +121,7 @@ def run():
         'evaluation': {
             'method': exec_accuracy_evaluator,
             'task': 'movieTest',
-            'num_samples': min(2, len(test_data[0])),
+            'num_samples': len(test_data[0]),
             'num_samples_2': 1,
             'model': {
                 'gpt_config': {
@@ -155,23 +155,6 @@ def run():
         f.write(f'Prompt: {prompts[0]}\n\n\n\n\n')
 
 
-    #value = evaluate_prompt(prompts[0], test_film, conf, base_config)
-
-    #print(f'{value}/{len(test_film)}')
-
-def evaluate_prompt(prompt, answers, conf, base_conf):
-    configuration = config.update_config(conf, base_conf)
-    model = model_from_config(configuration['evaluation']['model'])
-    model_outputs = ""
-    model_outputs = model.evaluate_best_prompt(prompt, 1)
-
-    score_fn = utility.get_multi_answer_em
-    value = 0
-    for prediction, ans_ in zip(model_outputs, answers):
-        score = score_fn(prediction, ans_)
-        value += 1
-
-    return value
 
 
 
