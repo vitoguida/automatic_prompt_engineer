@@ -147,7 +147,7 @@ def run():
     #Llama-3-1-Nemotron-Nano-8B-v1
     #Phi-4-reasoning-plus
     #gemma-3-12b-it
-    with open('movielensDetect.txt', 'a') as f:
+    with open('Llama-3-1-Nemotron-Nano-8B-v1.txt', 'a') as f:
         f.write(f'----------------------------------------------------------------------')
         f.write(f'Test score: {test_score}\n')
         f.write(f'conf: {conf}\n')
