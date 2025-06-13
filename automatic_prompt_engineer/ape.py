@@ -1,5 +1,5 @@
 import random
-from automatic_prompt_engineer import generate, evaluate, config, template, data, llm
+import generate, evaluate, config, template, data, llm
 import logging
 
 def get_simple_prompt_gen_template(prompt_gen_template, prompt_gen_mode):
@@ -139,20 +139,20 @@ def find_prompts(eval_template,
     if few_shot_data is None:
         few_shot_data = prompt_gen_data
 
-    logging.log('Generating prompts...')
+    logging.info('Generating prompts...')
     prompts = generate.generate_prompts(
         prompt_gen_template, demos_template, prompt_gen_data, conf['generation'])
 
-    logging.log('Model returned {} prompts. Deduplicating...'.format(len(prompts)))
+    logging.info('Model returned {} prompts. Deduplicating...'.format(len(prompts)))
     prompts = list(set(prompts))
-    logging.log('Deduplicated to {} prompts.'.format(len(prompts)))
+    logging.info('Deduplicated to {} prompts.'.format(len(prompts)))
 
-    logging.log('Evaluating prompts...')
+    logging.info('Evaluating prompts...')
 
     res = evaluate.evalute_prompts(prompts, eval_template, eval_data, demos_template, few_shot_data,
                                    conf['evaluation']['method'], conf['evaluation'])
 
-    logging.log('Finished evaluating.')
+    logging.info('Finished evaluating.')
 
     demo_fn = evaluate.demo_function(eval_template, conf['demo'])
 

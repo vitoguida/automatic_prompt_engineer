@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(".."))
 from experiments.evaluation.instruction_induction.exec_accuracy import exec_accuracy_evaluator
 
 logging.basicConfig(
-    filename='logfile.txt',
+    filename='log.txt',
     level=logging.INFO,
     format='%(message)s'
 )
@@ -104,7 +104,7 @@ def run():
             }
         }
 
-        logging.log("Starting finding prompts")
+        logging.info("Starting finding prompts")
         res, demo_fn = ape.find_prompts(eval_template=eval_template,
                                         prompt_gen_data=prompt_gen_data,
                                         eval_data=eval_data,
@@ -115,14 +115,14 @@ def run():
                                         prompt_gen_template=prompt_gen_template)
 
         elapsed_time = time.time() - start_time
-        logging.log('Finished finding prompts.')
+        logging.info('Finished finding prompts.')
         prompts, scores = res.sorted()
-        logging.log('Prompts:')
+        logging.info('Prompts:')
         for prompt, score in list(zip(prompts, scores))[:10]:
             logging.log(f'  {score}: {prompt}')
 
         # Evaluate on test data
-        logging.log('Evaluating on test data...')
+        logging.info('Evaluating on test data...')
 
         test_conf = {
             'generation': {
@@ -158,14 +158,14 @@ def run():
                                         base_conf=base_config)
 
         test_score = test_res.sorted()[1][0]
-        logging.log(f'Test score: {test_score}')
+        logging.info(f'Test score: {test_score}')
         print(f'Test score: {test_score}')
 
         # Save a text file to experiments/results/instruction_induction/task.txt with the best prompt and test score
         #Llama-3-1-Nemotron-Nano-8B-v1
         #Phi-4-reasoning-plus
         #gemma-3-12b-it
-        with open('Llama-3-1-Nemotron-Nano-8B-v1.txt', 'a') as f:
+        with open('Llama-3B-Instruct.txt', 'a') as f:
             f.write(f'----------------------------------------------------------------------')
             f.write(f'Test score: {test_score}\n')
             f.write(f'conf: {conf}\n')
