@@ -1,6 +1,6 @@
 import random
 from automatic_prompt_engineer import generate, evaluate, config, template, data, llm
-
+import logging
 
 def get_simple_prompt_gen_template(prompt_gen_template, prompt_gen_mode):
     if prompt_gen_template is None:
@@ -139,20 +139,20 @@ def find_prompts(eval_template,
     if few_shot_data is None:
         few_shot_data = prompt_gen_data
 
-    print('Generating prompts...')
+    logging.log('Generating prompts...')
     prompts = generate.generate_prompts(
         prompt_gen_template, demos_template, prompt_gen_data, conf['generation'])
 
-    print('Model returned {} prompts. Deduplicating...'.format(len(prompts)))
+    logging.log('Model returned {} prompts. Deduplicating...'.format(len(prompts)))
     prompts = list(set(prompts))
-    print('Deduplicated to {} prompts.'.format(len(prompts)))
+    logging.log('Deduplicated to {} prompts.'.format(len(prompts)))
 
-    print('Evaluating prompts...')
+    logging.log('Evaluating prompts...')
 
     res = evaluate.evalute_prompts(prompts, eval_template, eval_data, demos_template, few_shot_data,
                                    conf['evaluation']['method'], conf['evaluation'])
 
-    print('Finished evaluating.')
+    logging.log('Finished evaluating.')
 
     demo_fn = evaluate.demo_function(eval_template, conf['demo'])
 
@@ -180,12 +180,12 @@ def evaluate_prompts(prompts, eval_template, eval_data, demos_template, few_shot
     eval_template = template.EvalTemplate(eval_template)
     demos_template = template.DemosTemplate(demos_template)
 
-    print('Evaluating prompts...')
+    logging.log('Evaluating prompts...')
     res = evaluate.evalute_prompts(
         prompts, eval_template, eval_data, demos_template, few_shot_data, conf['evaluation']['method'],
         conf['evaluation'])
 
-    print('Finished evaluating.')
+    logging.log('Finished evaluating.')
 
     return res
 
