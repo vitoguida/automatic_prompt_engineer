@@ -180,12 +180,12 @@ def evaluate_prompts(prompts, eval_template, eval_data, demos_template, few_shot
     eval_template = template.EvalTemplate(eval_template)
     demos_template = template.DemosTemplate(demos_template)
 
-    logging.log('Evaluating prompts...')
+    logging.info('Evaluating prompts...')
     res = evaluate.evalute_prompts(
         prompts, eval_template, eval_data, demos_template, few_shot_data, conf['evaluation']['method'],
         conf['evaluation'])
 
-    logging.log('Finished evaluating.')
+    logging.info('Finished evaluating.')
 
     return res
 
