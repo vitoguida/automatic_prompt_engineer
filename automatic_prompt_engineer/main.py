@@ -7,6 +7,7 @@ import ape, data
 import logging
 from datetime import datetime
 import time
+from datetime import timedelta
 from tqdm import tqdm
 
 sys.path.append(os.path.abspath(".."))
@@ -172,6 +173,14 @@ def run():
             f.write(f'conf: {conf}\n')
             f.write(f'test_conf: {test_conf}\n')
             f.write(f'Prompt: {prompts[0]}\n\n\n\n\n')
+
+        data_corrente = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        logging.info(f"Fine esecuzione, data: {data_corrente}")
+        exec_time = time.time() - start_time
+        # converto i secondi in hh:mm:ss
+        formatted_time = str(timedelta(seconds=int(exec_time)))
+        logging.info(f"Tempo totale di esecuzione: {exec_time}")
 
 
 
