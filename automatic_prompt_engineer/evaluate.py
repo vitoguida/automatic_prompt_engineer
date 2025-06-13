@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from automatic_prompt_engineer import llm
+import llm
 
 
 
