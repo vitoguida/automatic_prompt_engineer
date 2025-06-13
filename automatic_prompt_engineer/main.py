@@ -6,7 +6,8 @@ import ape, data
 
 import logging
 from datetime import datetime
-import time, tqdm
+import time
+from tqdm import tqdm
 
 sys.path.append(os.path.abspath(".."))
 from experiments.evaluation.instruction_induction.exec_accuracy import exec_accuracy_evaluator
