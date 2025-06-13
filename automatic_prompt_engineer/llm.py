@@ -4,7 +4,6 @@ import os
 import time
 from tqdm import tqdm
 from abc import ABC, abstractmethod
-from abc import ABC, abstractmethod
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 import openai
@@ -15,15 +14,7 @@ print(torch.cuda.device_count())
 print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU")
 
 
-openai.api_type = "azure"
-#openai.api_base = "https://dipalma3.openai.azure.com/%22"
-openai.api_base = "https://dipalma3.openai.azure.com/"
-openai.api_version = "2024-05-01-preview"
-openai.api_key = ""
-
-
 deployment_name = "gpt-4o-mini"
-
 gpt_costs_per_thousand = {
     'davinci': 0.0200,
     'curie': 0.0020,
@@ -32,17 +23,10 @@ gpt_costs_per_thousand = {
     'GPT-4o-mini' : 0.005
 }
 
-# Set API key
-#genai.configure(api_key="AIzaSyBpq7djfvlT_v9p-0TmCUa1EdyrtYe7-AM")
+
 
 keys = {
     "api_keys": [
-        "AIzaSyBpq7djfvlT_v9p-0TmCUa1EdyrtYe7-AM",
-        "AIzaSyAqPoRXEZILgehqs7wbS6ZWvCn1o_GN5Ds",
-        "AIzaSyBZ1Ww55Anz3wLsoVo1RVaAdzEo-IwB_0E",
-        "AIzaSyDO4D0FET1keJJhYposcw8z4geSm_q_zQY",
-        "AIzaSyCdrR0mYx84kQbhcQndyScVi2o26YcEzPw",
-        "AIzaSyA5QXaafhU7zkD0faeVMWgz_D9FJto5Ts0",
     ]
 }
 
