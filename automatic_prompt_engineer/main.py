@@ -121,7 +121,7 @@ def run():
         prompts, scores = res.sorted()
         logging.info('Prompts:')
         for prompt, score in list(zip(prompts, scores))[:10]:
-            logging.log(f'  {score}: {prompt}')
+            logging.info(f'  {score}: {prompt}')
 
         # Evaluate on test data
         logging.info('Evaluating on test data...')
