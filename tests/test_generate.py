@@ -18,7 +18,7 @@ def test_generate_instruction():
             'num_demos': 5,
             'num_prompts_per_subsample': 2,
             'model': {
-                'gpt_config': {
+                'model_config': {
                     'model': 'text-ada-001'
                 }
             }

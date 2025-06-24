@@ -6,7 +6,7 @@ def test_log_prob():
     user_config = {
         'evaluation': {
             'model': {
-                'gpt_config': {
+                'model_config': {
                     'model': 'text-ada-001'
                 }
             }
@@ -27,7 +27,7 @@ def test_strange_character():
     user_config = {
         'evaluation': {
             'model': {
-                'gpt_config': {
+                'model_config': {
                     'model': 'text-ada-001'
                 }
             }

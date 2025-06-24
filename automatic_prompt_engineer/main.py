@@ -82,26 +82,11 @@ def run():
 
         base_config = '../experiments/configs/instruction_induction.yaml'
         conf = {
-            'generation': {
-                'num_subsamples': 2,
-                'num_demos': 5,
-                'num_prompts_per_subsample': 2,
-                'model': {
-                    'gpt_config': {
-                        # 'model': 'text-ada-001'
-                    }
-                }
-            },
             'evaluation': {
                 'method': exec_accuracy_evaluator,
-                'task': 'movietesttask',
+                'task': 'movieTest',
                 'num_samples': min(2, len(eval_data[0])),
-                'num_samples_2': min(2, len(eval_data[0])),
-                'model': {
-                    'gpt_config': {
-                        # 'model': 'text-ada-001'
-                    }
-                }
+                'num_samples_2': min(2, len(eval_data[0]))
             }
         }
 
@@ -131,7 +116,7 @@ def run():
                 'num_demos': 5,
                 'num_prompts_per_subsample': 2,
                 'model': {
-                    'gpt_config': {
+                    'model_config': {
                         # 'model': 'text-ada-001'
                     }
                 }
@@ -142,8 +127,12 @@ def run():
                 'num_samples': len(test_data[0]),
                 'num_samples_2': 1,
                 'model': {
-                    'gpt_config': {
-                        # 'model': 'text-ada-001'
+                    'model_config': {
+                        'temperature': 0.7,
+                        'max_tokens': 500,
+                        'top_p': 1.0,
+                        'frequency_penalty': 0.0,
+                        'presence_penalty': 0.0
                     },
                     'batch_size': 1
                 }

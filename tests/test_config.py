@@ -5,7 +5,7 @@ def test_nested_update():
     user_config = {
         'generation': {
             'model': {
-                'gpt_config': {
+                'model_config': {
                     'temperature': 1.0
                 }
             }
@@ -18,7 +18,7 @@ def test_nested_update():
     import yaml
     with open(os.path.join(os.path.dirname(__file__), '../automatic_prompt_engineer/configs/default.yaml')) as f:
         manually_updated_config = yaml.safe_load(f)
-    manually_updated_config['generation']['model']['gpt_config']['temperature'] = 1.0
+    manually_updated_config['generation']['model']['model_config']['temperature'] = 1.0
 
     # Assert that the manually updated config is the same as the updated config (recursively)
     def assert_equal(d1, d2):

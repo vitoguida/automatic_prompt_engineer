@@ -76,7 +76,7 @@ def simple_eval(dataset,
     eval_template = template.EvalTemplate(eval_template)
     demos_template = template.DemosTemplate(demos_template)
     conf = config.update_config({}, 'configs/default.yaml')
-    conf['evaluation']['model']['gpt_config']['model'] = eval_model
+    conf['evaluation']['model']['model_config']['model'] = eval_model
     conf['evaluation']['num_samples'] = min(len(dataset[0]), num_samples)
     res = evaluate.evalute_prompts(
         prompts, eval_template, dataset, demos_template, dataset, conf['evaluation']['method'], conf['evaluation'])
@@ -201,7 +201,7 @@ def estimate_cost(eval_template,
                   eval_query=None):
     conf = config.update_config(conf, base_conf)
 
-    max_prompt_len = conf['generation']['model']['gpt_config']['max_tokens']
+    max_prompt_len = conf['generation']['model']['model_config']['max_tokens']
     num_prompts = conf['generation']['num_prompts_per_subsample'] * \
                   conf['generation']['num_subsamples']
     eval_method = conf['evaluation']['method']
@@ -300,7 +300,7 @@ def get_evaluation_query(eval_template,
             raise ValueError(
                 'Cannot estimate costs for: {}'.format(eval_base_method))
 
-    max_prompt_len = conf['generation']['model']['gpt_config']['max_tokens']
+    max_prompt_len = conf['generation']['model']['model_config']['max_tokens']
     filler_prompt = 'GGGG' * max_prompt_len
 
     queries = []

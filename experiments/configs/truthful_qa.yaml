@@ -5,7 +5,7 @@ generation:
   model:
     name: GPT_forward
     batch_size: 500
-    gpt_config:
+    model_config:
       model: GPT-4o-mini
       temperature: 0.9
       max_tokens: 50

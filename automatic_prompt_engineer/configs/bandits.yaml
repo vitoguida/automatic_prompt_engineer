@@ -5,7 +5,7 @@ generation:
   model:
     name: GPT_forward # the name of the model used for prompt generation
     batch_size: 500 # the maximum batch size used for prompt generation
-    gpt_config: # the configuration of the GPT model used for prompt generation (these are fed directly to the openai function)
+    model_config: # the configuration of the GPT model used for prompt generation (these are fed directly to the openai function)
       model: GPT-4o-mini
       temperature: 0.9
       max_tokens: 300
@@ -26,7 +26,7 @@ evaluation:
     model:
       name: GPT_forward
       batch_size: 500
-      gpt_config:
+      model_config:
         model: GPT-4o-mini
         temperature: 0.7
         max_tokens: 400
@@ -37,7 +37,7 @@ demo:
   model:
     name: GPT_forward
     batch_size: 500
-    gpt_config:
+    model_config:
       model: GPT-4o-mini
       temperature: 0.7
       max_tokens: 300

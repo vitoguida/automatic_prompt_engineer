@@ -15,7 +15,7 @@ def test_likelihood():
             'num_samples': 2,
             'num_few_shot': 1,
             'model': {
-                'gpt_config': {
+                'model_config': {
                     'model': 'text-ada-001'
                 }
             }
@@ -41,7 +41,7 @@ def test_likelihood_indices():
             'num_samples': 2,
             'model': {
                 'batch_size': 1,
-                'gpt_config': {
+                'model_config': {
                     'model': 'text-ada-001'
                 }
             }

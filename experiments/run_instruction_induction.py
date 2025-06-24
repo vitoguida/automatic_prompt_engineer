@@ -42,7 +42,7 @@ def run(task):
             'num_demos': 5,
             'num_prompts_per_subsample': 30,
             'model': {
-                'gpt_config': {
+                'model_config': {
                     # 'model': 'text-ada-001'
                 }
             }
@@ -52,7 +52,7 @@ def run(task):
             'task': task,
             'num_samples': min(20, len(eval_data[0])),
             'model': {
-                'gpt_config': {
+                'model_config': {
                     # 'model': 'text-ada-001'
                 }
             }
@@ -83,7 +83,7 @@ def run(task):
             'num_demos': 5,
             'num_prompts_per_subsample': 30,
             'model': {
-                'gpt_config': {
+                'model_config': {
                     # 'model': 'text-ada-001'
                 }
             }
@@ -93,7 +93,7 @@ def run(task):
             'task': task,
             'num_samples': min(100, len(test_data[0])),
             'model': {
-                'gpt_config': {
+                'model_config': {
                     # 'model': 'text-ada-001'
                 }
             }

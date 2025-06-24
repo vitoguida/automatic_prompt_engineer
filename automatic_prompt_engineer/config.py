@@ -23,7 +23,7 @@ def update_config(config, base_config='configs/default.yaml'):
 def simple_config(eval_model, prompt_gen_model, prompt_gen_mode, num_prompts, eval_rounds, prompt_gen_batch_size, eval_batch_size):
     """Returns a config and splits the data into sensible chunks."""
     conf = update_config({}, 'configs/bandits.yaml')
-    conf['generation']['model']['gpt_config']['model'] = prompt_gen_model
+    conf['generation']['model']['model_config']['model'] = prompt_gen_model
     if prompt_gen_mode == 'insert':
         conf['generation']['model']['name'] = 'GPT_insert'
         conf['generation']['model']['batch_size'] = 1
@@ -33,7 +33,7 @@ def simple_config(eval_model, prompt_gen_model, prompt_gen_mode, num_prompts, ev
     conf['generation']['num_subsamples'] = num_prompts // 10
     conf['generation']['num_prompts_per_subsample'] = 10
 
-    conf['evaluation']['base_eval_config']['model']['gpt_config']['model'] = eval_model
+    conf['evaluation']['base_eval_config']['model']['model_config']['model'] = eval_model
     conf['evaluation']['base_eval_config']['model']['batch_size'] = eval_batch_size
     # total eval = rounds * num_prompts_per_round * num_samples
     # We fix the number of samples to 10 and the number of prompts per round to 1/3 of

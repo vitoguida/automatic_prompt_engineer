@@ -36,7 +36,7 @@ def run():
             'model': {
                 'name': 'GPT_insert',
                 'batch_size': 1,
-                'gpt_config': {
+                'model_config': {
                     # 'model': 'text-ada-001'
                 }
             }
@@ -45,7 +45,7 @@ def run():
             'method': fine_tuned_gpt_evaluator,
             'num_samples': 10,
             'model': {
-                'gpt_config': {
+                'model_config': {
                     # 'model': 'text-curie-001'
                 }
             }

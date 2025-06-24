@@ -8,6 +8,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 import openai
 import google.generativeai as genai
+from vllm import LLM, SamplingParams
 
 print(torch.cuda.is_available())
 print(torch.cuda.device_count())
@@ -74,7 +75,7 @@ class LLM(ABC):
 class BatchSizeException(Exception):
     pass
 
-class LocalLlama:
+"""class LocalLlama:
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
         self.config = config
         self.needs_confirmation = needs_confirmation
@@ -172,6 +173,56 @@ class LocalLlama:
     def get_token_indices(self, offsets, log_prob_range):
         # Placeholder: Hugging Face models don’t provide offset mappings for decoding
         return 0, len(offsets)
+    """
+class LocalLlama:
+    def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
+        self.config = config
+        self.needs_confirmation = needs_confirmation
+        self.disable_tqdm = disable_tqdm
+
+        model_name = config["model_config"]["model"]
+        self.batch_size = config.get("batch_size", 1)
+
+        # Inizializza vLLM
+        self.llm = LLM(model=model_name)
+        self.sampling_params = SamplingParams(
+            temperature=config["model_config"].get("temperature", 0.7),
+            max_tokens=config["model_config"].get("max_tokens", 128),
+            top_p=config["model_config"].get("top_p", 0.9),
+            n=1  # lo modificheremo dinamicamente
+        )
+
+    def confirm_cost(self, texts, n, max_tokens):
+        print("⚠️ Cost estimation non supportata con vLLM. Skipping confirmation.")
+
+    def generate_text(self, prompt, n):
+        if not isinstance(prompt, list):
+            prompt = [prompt]
+
+        if self.needs_confirmation:
+            self.confirm_cost(prompt, n, self.config['model_config']['max_tokens'])
+
+        prompt_batches = [prompt[i:i + self.batch_size] for i in range(0, len(prompt), self.batch_size)]
+        results = []
+
+        for prompt_batch in tqdm(prompt_batches, disable=self.disable_tqdm):
+            self.sampling_params.n = n  # aggiorna il numero di sequenze generate
+            outputs = self.llm.generate(prompt_batch, self.sampling_params)
+            for output in outputs:
+                for result in output.outputs:
+                    results.append(result.text.strip())
+
+        return results
+
+    def complete(self, prompt, n):
+        return self.generate_text(prompt, n)
+
+    def log_probs(self, texts, log_prob_range=None):
+        print("⚠️ log_probs non supportato in vLLM (ancora).")
+        return [], []
+
+    def get_token_indices(self, offsets, log_prob_range):
+        return 0, len(offsets)
 
 
 class GeminiForward(LLM):
@@ -264,7 +315,7 @@ class GPT_Forward(LLM):
             prompt = [prompt]
         if self.needs_confirmation:
             self.confirm_cost(
-                prompt, n, self.config['gpt_config']['max_tokens'])
+                prompt, n, self.config['model_config']['max_tokens'])
         batch_size = self.config['batch_size']
         prompt_batches = [prompt[i:i + batch_size]
                           for i in range(0, len(prompt), batch_size)]
@@ -354,7 +405,7 @@ class GPT_Forward(LLM):
         """Generates text from the model."""
         if not isinstance(prompt, list):
             prompt = [prompt]
-        config = self.config['gpt_config'].copy()
+        config = self.config['model_config'].copy()
         config['n'] = n
 
         # Pulisce eventuali [APE] token
@@ -406,7 +457,7 @@ class GPT_Forward(LLM):
         """Generates text from the model and returns the log prob data."""
         if not isinstance(prompt, list):
             prompt = [prompt]
-        config = self.config['gpt_config'].copy()
+        config = self.config['model_config'].copy()
         config['n'] = n
 
         for i in range(len(prompt)):
@@ -540,7 +591,7 @@ class GPT_Forward(LLM):
         if not isinstance(text, list):
             text = [text]
 
-        config = self.config['gpt_config'].copy()
+        config = self.config['model_config'].copy()
         config['max_tokens'] = 1  # Usiamo 1 token per l'echo con logprobs
 
         log_probs = []
@@ -633,7 +684,7 @@ class GPT_Insert(LLM):
             prompt = [prompt]
         if self.needs_confirmation:
             self.confirm_cost(
-                prompt, n, self.config['gpt_config']['max_tokens'])
+                prompt, n, self.config['model_config']['max_tokens'])
         batch_size = self.config['batch_size']
         assert batch_size == 1
         prompt_batches = [prompt[i:i + batch_size]
@@ -672,7 +723,7 @@ class GPT_Insert(LLM):
 
     def __generate_text(self, prompt, n):
         """Generates text from the model."""
-        config = self.config['gpt_config'].copy()
+        config = self.config['model_config'].copy()
         config['n'] = n
 
         prefix = prompt[0].split('[APE]')[0]
@@ -706,11 +757,11 @@ def gpt_get_estimated_cost(config, prompt, max_tokens):
     n_prompt_tokens = len(prompt) // 4
     # Get the number of tokens in the generated text
     total_tokens = n_prompt_tokens + max_tokens
-    engine = config['gpt_config']['model'].split('-')[1]
+    engine = config['model_config']['model'].split('-')[1]
     costs_per_thousand = gpt_costs_per_thousand
     if engine not in costs_per_thousand:
         # Try as if it is a fine-tuned model
-        engine = config['gpt_config']['model'].split(':')[0]
+        engine = config['model_config']['model'].split(':')[0]
         costs_per_thousand = {
             'davinci': 0.1200,
             'curie': 0.0120,

@@ -292,7 +292,7 @@ def compute_score(prompt,
     eval_template = template.EvalTemplate(eval_template)
     demos_template = template.DemosTemplate(demos_template)
     conf = config.update_config({}, 'configs/default.yaml')
-    conf['evaluation']['model']['gpt_config']['model'] = eval_model
+    conf['evaluation']['model']['model_config']['model'] = eval_model
     conf['evaluation']['num_samples'] = min(len(eval_data[0]), 50)
     conf['evaluation']['num_few_shot'] = num_few_shot
     res = evaluate.evalute_prompts([prompt], eval_template, eval_data, demos_template, eval_data,

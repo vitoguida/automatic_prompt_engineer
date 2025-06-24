@@ -10,7 +10,7 @@ model_names = {
 model_config = {
     "name": "GPT_forward",
     "batch_size": 20,
-    "gpt_config": {
+    "model_config": {
         "model": 'filler',
         "temperature": 0,
         "max_tokens": 1,
@@ -38,7 +38,7 @@ def gpt_eval(inputs, outputs):
     template = TruthfulQATemplate('Q: [INPUT]\nA: [OUTPUT]\n[MODE]:')
     truthful, informative = [], []
     for mode in ["judge", "info"]:
-        model_config['gpt_config']['model'] = model_names[mode]
+        model_config['model_config']['model'] = model_names[mode]
         model = llm.model_from_config(model_config)
         model_preds = model.generate_text(
             [template.fill(q, a, mode) for q, a in zip(inputs, outputs)], 1)
