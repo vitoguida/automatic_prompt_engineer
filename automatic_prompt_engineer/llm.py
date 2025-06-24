@@ -175,6 +175,20 @@ class BatchSizeException(Exception):
         return 0, len(offsets)
     """
 class LocalLlama:
+    def get_dynamic_gpu_utilization(safety_margin=0.9):
+        """
+        Compute a safe gpu_memory_utilization based on available memory.
+        safety_margin: float between 0.0 and 1.0 (default: 90%)
+        """
+        device = torch.cuda.current_device()
+        total_memory = torch.cuda.get_device_properties(device).total_memory
+        reserved = torch.cuda.memory_reserved(device)
+        allocated = torch.cuda.memory_allocated(device)
+        free_memory = total_memory - reserved
+
+        utilization = (free_memory / total_memory) * safety_margin
+        return round(utilization, 2)
+
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
         self.config = config
         self.needs_confirmation = needs_confirmation
@@ -183,8 +197,11 @@ class LocalLlama:
         model_name = config["model_config"]["model"]
         self.batch_size = config.get("batch_size", 1)
 
+        gpu_util = self.get_dynamic_gpu_utilization()
+        print("Dynamic gpu_memory_utilization:", gpu_util)
+
         # Inizializza vLLM
-        self.llm = LLM(model=model_name)
+        self.llm = LLM(model=model_name, max_model_len=512, gpu_memory_utilization=gpu_util)
         self.sampling_params = SamplingParams(
             temperature=config["model_config"].get("temperature", 0.7),
             max_tokens=config["model_config"].get("max_tokens", 128),
