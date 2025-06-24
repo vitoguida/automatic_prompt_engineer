@@ -190,6 +190,7 @@ class LocalLlama:
         model_name = config["model_config"]["model"]
         self.batch_size = config.get("batch_size", 1)
 
+        torch.cuda.empty_cache()
         gpu_util = self.get_dynamic_gpu_utilization()
         print("Dynamic gpu_memory_utilization:", gpu_util)
 
@@ -213,7 +214,7 @@ class LocalLlama:
         total = info.total  # total GPU memory in bytes
         free = info.free  # currently available memory in bytes
 
-        utilization = (free / total) * safety_margin
+        utilization = max((free / total) * safety_margin, 0.05)
         print(f"Total: {total // 2 ** 20} MiB | Free: {free // 2 ** 20} MiB | Utilization: {utilization}")
         return round(utilization, 2)
 

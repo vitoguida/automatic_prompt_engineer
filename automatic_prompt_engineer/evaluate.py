@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
 import llm
+import torch
+import gc
 
 
 
@@ -61,6 +63,11 @@ def demo_function(eval_template, config):
         outputs = model.generate_text(
             queries, n=1)
         return [out.strip().split('\n')[0] for out in outputs]
+
+    # --- Memory cleanup ---
+    del model
+    torch.cuda.empty_cache()
+    gc.collect()
 
     return fn
 

@@ -1,0 +1,9 @@
+Inizio esecuzione, data: 2025-06-24 23:01:12
+Starting finding prompts
+Generating prompts...
+Inizio esecuzione, data: 2025-06-24 23:01:52
+Starting finding prompts
+Generating prompts...
+Inizio esecuzione, data: 2025-06-24 23:03:16
+Starting finding prompts
+Generating prompts...

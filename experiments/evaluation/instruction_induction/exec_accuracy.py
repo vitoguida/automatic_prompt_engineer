@@ -1,5 +1,6 @@
 import numpy as np
-
+import torch
+import gc
 from automatic_prompt_engineer import data, llm, evaluate
 from experiments.evaluation.instruction_induction import utility
 
@@ -57,6 +58,11 @@ def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, f
     scores = np.array(scores).reshape(len(prompts), config['num_samples'])
 
     res = ExecAccuracyEvaluationResult(prompts, scores)
+
+    # --- Memory cleanup ---
+    del model
+    torch.cuda.empty_cache()
+    gc.collect()
     return res
 
 

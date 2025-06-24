@@ -3,7 +3,7 @@ import sys
 import os
 import fire
 import ape, data
-
+import torch
 import logging
 from datetime import datetime
 import time
@@ -85,8 +85,8 @@ def run():
             'evaluation': {
                 'method': exec_accuracy_evaluator,
                 'task': 'movieTest',
-                'num_samples': min(2, len(eval_data[0])),
-                'num_samples_2': min(2, len(eval_data[0]))
+                'num_samples': len(eval_data[0]) ,#min(2, len(eval_data[0])),
+                'num_samples_2': len(eval_data[0]), #min(2, len(eval_data[0]))
             }
         }
 
@@ -99,8 +99,9 @@ def run():
                                         few_shot_data=prompt_gen_data,
                                         demos_template=demos_template,
                                         prompt_gen_template=prompt_gen_template)
-
+        # torch.distributed.destroy_process_group()
         elapsed_time = time.time() - start_time
+
         logging.info('Finished finding prompts.')
         prompts, scores = res.sorted()
         logging.info('Prompts:')
@@ -146,7 +147,7 @@ def run():
                                         demos_template=demos_template,
                                         conf=test_conf,
                                         base_conf=base_config)
-
+        # torch.distributed.destroy_process_group()
         test_score = test_res.sorted()[1][0]
         logging.info(f'Test score: {test_score}')
         print(f'Test score: {test_score}')

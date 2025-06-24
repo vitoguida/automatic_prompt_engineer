@@ -1,5 +1,7 @@
 from faulthandler import disable
 import data, llm
+import gc
+import torch
 
 
 def get_query(prompt_gen_template, demos_template, subsampled_data):
@@ -39,4 +41,8 @@ def generate_prompts(prompt_gen_template, demos_template, prompt_gen_data, confi
     model = llm.model_from_config(config['model'], disable_tqdm=False)
     prompts = model.generate_text(
         queries, n=config['num_prompts_per_subsample'])
+    # --- Memory cleanup ---
+    del model
+    torch.cuda.empty_cache()
+    gc.collect()
     return prompts
