@@ -162,16 +162,6 @@ def run():
         logging.info(f'Test score: {test_score}')
         print(f'Test score: {test_score}')
 
-        # Save a text file to experiments/results/instruction_induction/task.txt with the best prompt and test score
-        #Llama-3-1-Nemotron-Nano-8B-v1
-        #Phi-4-reasoning-plus
-        #gemma-3-12b-it
-        with open('Llama-3B-Instruct.txt', 'a') as f:
-            f.write(f'----------------------------------------------------------------------')
-            f.write(f'Test score: {test_score}\n')
-            f.write(f'conf: {conf}\n')
-            f.write(f'test_conf: {test_conf}\n')
-            f.write(f'Prompt: {prompts[0]}\n\n\n\n\n')
 
         data_corrente = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -179,7 +169,20 @@ def run():
         exec_time = time.time() - start_time
         # converto i secondi in hh:mm:ss
         formatted_time = str(timedelta(seconds=int(exec_time)))
-        logging.info(f"Tempo totale di esecuzione: {exec_time}")
+        logging.info(f"Tempo totale di esecuzione: {exec_time/3600} ore")
+
+
+        # Save a text file to experiments/results/instruction_induction/task.txt with the best prompt and test score
+        #Llama-3-1-Nemotron-Nano-8B-v1
+        #Phi-4-reasoning-plus
+        #gemma-3-12b-it
+        with open('Llama-3B-Instruct.txt', 'a') as f:
+            f.write(f'----------------------------------------------------------------------\n')
+            f.write(f'Tempo totale di esecuzione: {exec_time/3600} ore\n')
+            f.write(f'Test score: {test_score}\n\n')
+            f.write(f'conf: {conf}\n')
+            f.write(f'test_conf: {test_conf}\n\n')
+            f.write(f'Prompt: {prompts[0]}\n\n\n\n\n')
 
 
 
