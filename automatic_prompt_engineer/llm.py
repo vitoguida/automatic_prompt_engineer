@@ -47,7 +47,7 @@ def model_from_config(config, disable_tqdm=True):
     raise ValueError(f"Unknown model type: {model_type}")
 
 
-class LLM(ABC):
+class LLM_class(ABC):
     """Abstract base class for large language models."""
 
     @abstractmethod
@@ -225,7 +225,7 @@ class LocalLlama:
         return 0, len(offsets)
 
 
-class GeminiForward(LLM):
+class GeminiForward(LLM_class):
     """Wrapper for Gemini model using multiple API keys sequentially."""
 
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
@@ -280,7 +280,7 @@ class GeminiForward(LLM):
         return results
 
 
-class GPT_Forward(LLM):
+class GPT_Forward(LLM_class):
     """Wrapper for GPT-3."""
 
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
@@ -650,7 +650,7 @@ class GPT_Forward(LLM):
         return lower_index, upper_index
 
 
-class GPT_Insert(LLM):
+class GPT_Insert(LLM_class):
 
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
         """Initializes the model."""
