@@ -9,6 +9,13 @@ import torch
 import openai
 import google.generativeai as genai
 from vllm import LLM, SamplingParams
+from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
+
+#os.environ["HUGGINGFACE_TOKEN"] = "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"
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
+from huggingface_hub import login
+login("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")  # Replace with your real token
+
 
 print(torch.cuda.is_available())
 print(torch.cuda.device_count())
@@ -187,7 +194,7 @@ class LocalLlama:
         print("Dynamic gpu_memory_utilization:", gpu_util)
 
         # Inizializza vLLM
-        self.llm = LLM(model=model_name, max_model_len=512, gpu_memory_utilization=gpu_util)
+        self.llm = LLM(model=model_name, max_model_len=512, gpu_memory_utilization=gpu_util, trust_remote_code=True)
         self.sampling_params = SamplingParams(
             temperature=config["model_config"].get("temperature", 0.7),
             max_tokens=config["model_config"].get("max_tokens", 128),
@@ -195,18 +202,19 @@ class LocalLlama:
             n=1  # lo modificheremo dinamicamente
         )
 
-    def get_dynamic_gpu_utilization(self, safety_margin=0.9):
+    def get_dynamic_gpu_utilization(self, index=0, safety_margin=0.9):
         """
-        Compute a safe gpu_memory_utilization based on available memory.
-        safety_margin: float between 0.0 and 1.0 (default: 90%)
+        Compute a safe gpu_memory_utilization using NVML, independent of PyTorch memory allocation state.
         """
-        device = torch.cuda.current_device()
-        total_memory = torch.cuda.get_device_properties(device).total_memory
-        reserved = torch.cuda.memory_reserved(device)
-        allocated = torch.cuda.memory_allocated(device)
-        free_memory = total_memory - reserved
+        nvmlInit()
+        handle = nvmlDeviceGetHandleByIndex(index)
+        info = nvmlDeviceGetMemoryInfo(handle)
 
-        utilization = (free_memory / total_memory) * safety_margin
+        total = info.total  # total GPU memory in bytes
+        free = info.free  # currently available memory in bytes
+
+        utilization = (free / total) * safety_margin
+        print(f"Total: {total // 2 ** 20} MiB | Free: {free // 2 ** 20} MiB | Utilization: {utilization}")
         return round(utilization, 2)
 
     def confirm_cost(self, texts, n, max_tokens):
