@@ -175,20 +175,6 @@ class BatchSizeException(Exception):
         return 0, len(offsets)
     """
 class LocalLlama:
-    def get_dynamic_gpu_utilization(safety_margin=0.9):
-        """
-        Compute a safe gpu_memory_utilization based on available memory.
-        safety_margin: float between 0.0 and 1.0 (default: 90%)
-        """
-        device = torch.cuda.current_device()
-        total_memory = torch.cuda.get_device_properties(device).total_memory
-        reserved = torch.cuda.memory_reserved(device)
-        allocated = torch.cuda.memory_allocated(device)
-        free_memory = total_memory - reserved
-
-        utilization = (free_memory / total_memory) * safety_margin
-        return round(utilization, 2)
-
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
         self.config = config
         self.needs_confirmation = needs_confirmation
@@ -208,6 +194,20 @@ class LocalLlama:
             top_p=config["model_config"].get("top_p", 0.9),
             n=1  # lo modificheremo dinamicamente
         )
+
+    def get_dynamic_gpu_utilization(self, safety_margin=0.9):
+        """
+        Compute a safe gpu_memory_utilization based on available memory.
+        safety_margin: float between 0.0 and 1.0 (default: 90%)
+        """
+        device = torch.cuda.current_device()
+        total_memory = torch.cuda.get_device_properties(device).total_memory
+        reserved = torch.cuda.memory_reserved(device)
+        allocated = torch.cuda.memory_allocated(device)
+        free_memory = total_memory - reserved
+
+        utilization = (free_memory / total_memory) * safety_margin
+        return round(utilization, 2)
 
     def confirm_cost(self, texts, n, max_tokens):
         print("⚠️ Cost estimation non supportata con vLLM. Skipping confirmation.")
