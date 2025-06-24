@@ -20,7 +20,6 @@ logging.basicConfig(
 )
 
 def run():
-    for i in tqdm(range(100), desc="Elaborazione"):
 
         # Ottieni la data/ora attuale in formato desiderato
         data_corrente = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
