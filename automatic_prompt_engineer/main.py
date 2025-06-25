@@ -19,13 +19,20 @@ logging.basicConfig(
     format='%(message)s'
 )
 
+def format_duration(seconds):
+    days, seconds = divmod(int(seconds), 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    if days > 0:
+        return f"{days}d {hours:02}h:{minutes:02}m:{seconds:02}s"
+    elif hours > 0:
+        return f"{hours:02}h:{minutes:02}m:{seconds:02}s"
+    elif minutes > 0:
+        return f"{minutes}m:{seconds:02}s"
+    else:
+        return f"{seconds}s"
+
 def run():
-
-        # Ottieni la data/ora attuale in formato desiderato
-        data_corrente = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        logging.info(f"Inizio esecuzione, data: {data_corrente}")
-        start_time = time.time()
-
         film = []
         idFilm = []
 
@@ -85,8 +92,8 @@ def run():
             'evaluation': {
                 'method': exec_accuracy_evaluator,
                 'task': 'movieTest',
-                'num_samples': len(eval_data[0]) ,#min(2, len(eval_data[0])),
-                'num_samples_2': len(eval_data[0]), #min(2, len(eval_data[0]))
+                'num_samples': len(eval_data[0]), #min(2, len(eval_data[0])),
+                'num_samples_2': len(eval_data[0]) #min(2, len(eval_data[0]))
             }
         }
 
@@ -100,7 +107,6 @@ def run():
                                         demos_template=demos_template,
                                         prompt_gen_template=prompt_gen_template)
         # torch.distributed.destroy_process_group()
-        elapsed_time = time.time() - start_time
 
         logging.info('Finished finding prompts.')
         prompts, scores = res.sorted()
@@ -177,4 +183,7 @@ def run():
 
 
 if __name__ == '__main__':
+    start = time.time()
     fire.Fire(run())
+    end = time.time()
+    print(f"Time elapsed: {format_duration(end - start)}")
