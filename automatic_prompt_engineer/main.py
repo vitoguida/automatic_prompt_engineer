@@ -3,12 +3,11 @@ import sys
 import os
 import fire
 import ape, data
-import torch
 import logging
 from datetime import datetime
 import time
 from datetime import timedelta
-from tqdm import tqdm
+import llm, config
 
 sys.path.append(os.path.abspath(".."))
 from experiments.evaluation.instruction_induction.exec_accuracy import exec_accuracy_evaluator
@@ -33,6 +32,7 @@ def format_duration(seconds):
         return f"{seconds}s"
 
 def run():
+        start_time = time.time()
         film = []
         idFilm = []
 
@@ -96,6 +96,10 @@ def run():
                 'num_samples_2': len(eval_data[0]) #min(2, len(eval_data[0]))
             }
         }
+        configuration = config.update_config(conf, base_config)
+
+        # Instantiate the LLM
+        model = llm.model_from_config(configuration['generation']['model'], disable_tqdm=False)
 
         logging.info("Starting finding prompts")
         res, demo_fn = ape.find_prompts(eval_template=eval_template,
@@ -105,7 +109,8 @@ def run():
                                         base_conf=base_config,
                                         few_shot_data=prompt_gen_data,
                                         demos_template=demos_template,
-                                        prompt_gen_template=prompt_gen_template)
+                                        prompt_gen_template=prompt_gen_template,
+                                        model=model)
         # torch.distributed.destroy_process_group()
 
         logging.info('Finished finding prompts.')

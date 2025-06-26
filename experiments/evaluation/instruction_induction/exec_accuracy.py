@@ -14,7 +14,7 @@ def get_query(prompt, eval_template, input_, output_, demo_data, demos_template)
     return query
 
 
-def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, few_shot_data, config):
+def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, few_shot_data, config, model):
     queries = []
     answers = []
     for prompt in prompts:
@@ -29,8 +29,6 @@ def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, f
             queries.append(query)
             answers.append(output_)
 
-    # Instantiate the LLM
-    model = llm.model_from_config(config['model'])
     model_outputs = model.generate_text(queries, config['num_samples_2']) #ho modificato prima c'era 1
 
     task = config['task']

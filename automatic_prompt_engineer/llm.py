@@ -14,7 +14,7 @@ from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
 #os.environ["HUGGINGFACE_TOKEN"] = "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"
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 from huggingface_hub import login
-login("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")  # Replace with your real token
+login("")  # Replace with your real token
 
 
 print(torch.cuda.is_available())
@@ -195,7 +195,7 @@ class LocalLlama:
         print("Dynamic gpu_memory_utilization:", gpu_util)
 
         # Inizializza vLLM
-        self.llm = LLM(model=model_name, max_model_len=512, gpu_memory_utilization=gpu_util, trust_remote_code=True)
+        self.llm = LLM(model=model_name, max_model_len=2048, gpu_memory_utilization=gpu_util, trust_remote_code=True)
         self.sampling_params = SamplingParams(
             temperature=config["model_config"].get("temperature", 0.7),
             max_tokens=config["model_config"].get("max_tokens", 128),

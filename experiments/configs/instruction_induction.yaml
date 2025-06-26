@@ -1,8 +1,10 @@
 generation:
-  num_subsamples: 20 # number of
-  num_demos: 10 # few-shot demonstration in the generated prompt
-  num_prompts_per_subsample: 40 # number of generated different prompts to test
-  # if num_prompts is 50 and num_subsamples is 5, then for each of the 5 subsamples, 10 prompts are generated and evaluated. ??
+  num_subsamples: 2 # number of
+  num_demos: 1 # few-shot demonstration in the generated prompt
+  num_prompts_per_subsample: 4 # number of generated different prompts to test
+  # if num_subsamples is 20 and num_prompts_per_subsample is 40,
+  # then for each subsamples, 40 prompts are generated, with a total of 800.
+
   model:
     name: LocalLlama
     batch_size: 500

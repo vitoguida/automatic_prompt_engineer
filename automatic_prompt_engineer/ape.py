@@ -109,7 +109,8 @@ def find_prompts(eval_template,
                  conf,
                  base_conf='configs/default.yaml',
                  few_shot_data=None,
-                 prompt_gen_template=None):
+                 prompt_gen_template=None,
+                 model=None):
     """
     Function to generate prompts using APE.
     Parameters:
@@ -121,6 +122,7 @@ def find_prompts(eval_template,
         few_shot_data: The data to use for demonstrations during eval (not implemented yet).
         eval_method: The evaluation method to use. ('likelihood')
         prompt_gen_template: The template to use for prompt generation.
+        model: The model to use for evaluation.
         verbosity: The verbosity level.
     Returns:
         An evaluation result. Also returns a function to evaluate the prompts with new inputs.
@@ -141,7 +143,7 @@ def find_prompts(eval_template,
 
     logging.info('Generating prompts...')
     prompts = generate.generate_prompts(
-        prompt_gen_template, demos_template, prompt_gen_data, conf['generation'])
+        prompt_gen_template, demos_template, prompt_gen_data, conf['generation'], model)
 
     logging.info('Model returned {} prompts. Deduplicating...'.format(len(prompts)))
     prompts = list(set(prompts))
@@ -150,11 +152,11 @@ def find_prompts(eval_template,
     logging.info('Evaluating prompts...')
 
     res = evaluate.evalute_prompts(prompts, eval_template, eval_data, demos_template, few_shot_data,
-                                   conf['evaluation']['method'], conf['evaluation'])
+                                   conf['evaluation']['method'], conf['evaluation'], model)
 
     logging.info('Finished evaluating.')
 
-    demo_fn = evaluate.demo_function(eval_template, conf['demo'])
+    demo_fn = evaluate.demo_function(eval_template, model)
 
     return res, demo_fn
 

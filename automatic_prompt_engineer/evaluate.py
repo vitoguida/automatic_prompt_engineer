@@ -26,7 +26,7 @@ def get_eval_method(eval_method):
         raise ValueError('Invalid evaluation method.')
 
 
-def evalute_prompts(prompts, eval_template, eval_data, demos_template, few_shot_data, eval_method, config):
+def evalute_prompts(prompts, eval_template, eval_data, demos_template, few_shot_data, eval_method, config, model):
     """
     Returns the scores for a list of prompts.
     Parameters:
@@ -39,10 +39,10 @@ def evalute_prompts(prompts, eval_template, eval_data, demos_template, few_shot_
         An evaluation result object.
     """
     eval_method = get_eval_method(eval_method)
-    return eval_method(prompts, eval_template, eval_data, demos_template, few_shot_data, config)
+    return eval_method(prompts, eval_template, eval_data, demos_template, few_shot_data, config, model)
 
 
-def demo_function(eval_template, config):
+def demo_function(eval_template, model):
     """
     Returns a function that can be manually test the LLM with a chosen prompt.
     Parameters:
@@ -51,7 +51,6 @@ def demo_function(eval_template, config):
     Returns:
         A function that takes a prompt and returns a demo.
     """
-    model = llm.model_from_config(config['model'])
 
     def fn(prompt, inputs):
         if not isinstance(inputs, list):
