@@ -17,7 +17,9 @@ def get_query(prompt, eval_template, input_, output_, demo_data, demos_template)
 def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, few_shot_data, config, model):
     queries = []
     answers = []
+    # prompts * num_samples = query for the evaluation
     for prompt in prompts:
+        # generazione di subsample per l'evaluation
         subsampled_data = data.subsample_data(
             eval_data, config['num_samples'])
         for d in zip(*subsampled_data):
@@ -29,7 +31,9 @@ def exec_accuracy_evaluator(prompts, eval_template, eval_data, demos_template, f
             queries.append(query)
             answers.append(output_)
 
-    model_outputs = model.generate_text(queries, config['num_samples_2']) #ho modificato prima c'era 1
+    # a che mi serve in evaluation generarmi dello stesso input n sequenze?
+    # model_outputs = model.generate_text(queries, config['num_samples'])
+    model_outputs = model.generate_text(queries)
 
     task = config['task']
     metric = utility.TASK_TO_METRIC.get(task, utility.default_metric)

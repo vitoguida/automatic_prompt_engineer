@@ -1,26 +1,19 @@
 """Contains classes for querying large language models."""
-from math import ceil
 import os
 import time
 from tqdm import tqdm
 from abc import ABC, abstractmethod
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+#from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 import openai
 import google.generativeai as genai
 from vllm import LLM, SamplingParams
 from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
 
-#os.environ["HUGGINGFACE_TOKEN"] = "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"
+#os.environ["HUGGINGFACE_TOKEN"] = ""
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 from huggingface_hub import login
 login("")  # Replace with your real token
-
-
-print(torch.cuda.is_available())
-print(torch.cuda.device_count())
-print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU")
-
 
 deployment_name = "gpt-4o-mini"
 gpt_costs_per_thousand = {
@@ -31,14 +24,10 @@ gpt_costs_per_thousand = {
     'GPT-4o-mini' : 0.005
 }
 
-
-
 keys = {
     "api_keys": [
     ]
 }
-
-
 
 def model_from_config(config, disable_tqdm=True):
     """Returns a model based on the config."""
@@ -82,107 +71,12 @@ class LLM_class(ABC):
 class BatchSizeException(Exception):
     pass
 
-"""class LocalLlama:
-    def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
-        self.config = config
-        self.needs_confirmation = needs_confirmation
-        self.disable_tqdm = disable_tqdm
-
-        model_name = config["gpt_config"]["model"]
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32)
-        self.model.eval()
-        if torch.cuda.is_available():
-            self.model.to("cuda")
-
-    def confirm_cost(self, texts, n, max_tokens):
-        print("⚠️ Estimating cost: Not supported for Hugging Face models. Skipping confirmation.")
-
-    def auto_reduce_n(self, fn, prompt, n):
-        try:
-            return fn(prompt, n)
-        except BatchSizeException as e:
-            if n == 1:
-                raise e
-            return self.auto_reduce_n(fn, prompt, n // 2) + self.auto_reduce_n(fn, prompt, n // 2)
-
-    def generate_text(self, prompt, n):
-        if not isinstance(prompt, list):
-            prompt = [prompt]
-
-        if self.needs_confirmation:
-            self.confirm_cost(prompt, n, self.config['gpt_config']['max_tokens'])
-
-        batch_size = self.config['batch_size']
-        prompt_batches = [prompt[i:i + batch_size] for i in range(0, len(prompt), batch_size)]
-        results = []
-
-        for prompt_batch in tqdm(prompt_batches, disable=self.disable_tqdm):
-            results += self.auto_reduce_n(self.__generate_text, prompt_batch, n)
-
-        return results
-
-    def __generate_text(self, prompts, n):
-        results = []
-        # Pulisce eventuali [APE] token
-        for i in range(len(prompts)):
-            prompts[i] = prompts[i].replace('[APE]', '').strip()
-
-        for prompt in prompts:
-            input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids
-            if torch.cuda.is_available():
-                input_ids = input_ids.to("cuda")
-
-            with torch.no_grad():
-                output = self.model.generate(
-                    input_ids,
-                    do_sample=True,
-                    max_new_tokens=self.config["gpt_config"]["max_tokens"],
-                    top_p=0.9,
-                    num_return_sequences=n,
-                    temperature=self.config["gpt_config"].get("temperature", 0.7)
-                )
-
-            texts = self.tokenizer.batch_decode(output, skip_special_tokens=True)
-            results.extend(texts)
-        return results
-
-    def complete(self, prompt, n):
-        return self.generate_text(prompt, n)
-
-    def log_probs(self, texts, log_prob_range=None):
-        if not isinstance(texts, list):
-            texts = [texts]
-
-        log_probs = []
-        tokens_out = []
-
-        for text in texts:
-            enc = self.tokenizer(text, return_tensors="pt", add_special_tokens=False)
-            input_ids = enc.input_ids
-            if torch.cuda.is_available():
-                input_ids = input_ids.to("cuda")
-
-            with torch.no_grad():
-                outputs = self.model(input_ids)
-                logits = outputs.logits
-
-            probs = torch.nn.functional.log_softmax(logits, dim=-1)
-            input_token_logprobs = probs[0, :-1, :].gather(1, input_ids[:, 1:].unsqueeze(-1)).squeeze(-1)
-            input_token_ids = input_ids[0, 1:]
-            tokens = [self.tokenizer.decode([tok]) for tok in input_token_ids]
-
-            log_probs.append(input_token_logprobs.tolist())
-            tokens_out.append(tokens)
-
-        return log_probs, tokens_out
-
-    def get_token_indices(self, offsets, log_prob_range):
-        # Placeholder: Hugging Face models don’t provide offset mappings for decoding
-        return 0, len(offsets)
-    """
 class LocalLlama:
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
+        print(torch.cuda.is_available())
+        print(torch.cuda.device_count())
+        print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else "No GPU")
+
         self.config = config
         self.needs_confirmation = needs_confirmation
         self.disable_tqdm = disable_tqdm
@@ -195,15 +89,18 @@ class LocalLlama:
         print("Dynamic gpu_memory_utilization:", gpu_util)
 
         # Inizializza vLLM
-        self.llm = LLM(model=model_name, max_model_len=2048, gpu_memory_utilization=gpu_util, trust_remote_code=True)
+        self.llm = LLM(model=model_name, max_model_len=500, gpu_memory_utilization=gpu_util)
         self.sampling_params = SamplingParams(
             temperature=config["model_config"].get("temperature", 0.7),
             max_tokens=config["model_config"].get("max_tokens", 128),
             top_p=config["model_config"].get("top_p", 0.9),
-            n=1  # lo modificheremo dinamicamente
+            n=1  # Parametro più importante! Indica il numero di volte che genera la stessa sequenza
+                # eg. n = 20 indica che lo stesso prompt viene generato 20 volte, e l'evaluation seleziona quello con punteggio più alto
+                # perch+é il modello è probabilmente più accurato
+            # To-Do: implementare questo numero non dinamicamente ma dal config per ridurre il numero di chiamate al modello
         )
 
-    def get_dynamic_gpu_utilization(self, index=0, safety_margin=0.9):
+    def get_dynamic_gpu_utilization(self, index=0, safety_margin=0.7):
         """
         Compute a safe gpu_memory_utilization using NVML, independent of PyTorch memory allocation state.
         """
@@ -221,7 +118,7 @@ class LocalLlama:
     def confirm_cost(self, texts, n, max_tokens):
         print("⚠️ Cost estimation non supportata con vLLM. Skipping confirmation.")
 
-    def generate_text(self, prompt, n):
+    def generate_text(self, prompt, n=1):
         if not isinstance(prompt, list):
             prompt = [prompt]
 
@@ -249,7 +146,6 @@ class LocalLlama:
 
     def get_token_indices(self, offsets, log_prob_range):
         return 0, len(offsets)
-
 
 class GeminiForward(LLM_class):
     """Wrapper for Gemini model using multiple API keys sequentially."""
@@ -304,7 +200,6 @@ class GeminiForward(LLM_class):
                             results.append("")
                             break
         return results
-
 
 class GPT_Forward(LLM_class):
     """Wrapper for GPT-3."""
@@ -675,7 +570,6 @@ class GPT_Forward(LLM_class):
 
         return lower_index, upper_index
 
-
 class GPT_Insert(LLM_class):
 
     def __init__(self, config, needs_confirmation=False, disable_tqdm=True):
@@ -774,7 +668,6 @@ class GPT_Insert(LLM_class):
         texts = [choice['message']['content'].replace(suffix, '') for choice in response['choices']]
         return texts
 
-
 def gpt_get_estimated_cost(config, prompt, max_tokens):
     """Uses the current API costs/1000 tokens to estimate the cost of generating text from the model."""
     # Get rid of [APE] token
@@ -796,7 +689,6 @@ def gpt_get_estimated_cost(config, prompt, max_tokens):
         }
     price = costs_per_thousand[engine] * total_tokens / 1000
     return price
-
 
 class BatchSizeException(Exception):
     pass

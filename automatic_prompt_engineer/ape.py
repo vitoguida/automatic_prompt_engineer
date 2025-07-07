@@ -156,13 +156,14 @@ def find_prompts(eval_template,
 
     logging.info('Finished evaluating.')
 
-    demo_fn = evaluate.demo_function(eval_template, model)
+    # A che serve ? Poi non viene usata
+    # demo_fn = evaluate.demo_function(eval_template, model)
 
-    return res, demo_fn
+    return res#, demo_fn
 
 
 def evaluate_prompts(prompts, eval_template, eval_data, demos_template, few_shot_data, conf,
-                     base_conf='configs/default.yaml'):
+                     base_conf='configs/default.yaml', model=None):
     """
     Function to evaluate a list of prompts.
     Parameters:
@@ -185,7 +186,7 @@ def evaluate_prompts(prompts, eval_template, eval_data, demos_template, few_shot
     logging.info('Evaluating prompts...')
     res = evaluate.evalute_prompts(
         prompts, eval_template, eval_data, demos_template, few_shot_data, conf['evaluation']['method'],
-        conf['evaluation'])
+        conf['evaluation'], model)
 
     logging.info('Finished evaluating.')
 
