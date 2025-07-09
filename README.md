@@ -1,7 +1,6 @@
 # Large Language Models Are Human-Level Prompt Engineers
 
-Yongchao Zhou*, Andrei Ioan Muresanu*, Ziwen Han\*, Keiran Paster, Silviu Pitis, Harris Chan, Jimmy Ba
-
+Original project:
 [Project Page](https://sites.google.com/view/automatic-prompt-engineer) | [ArXiv](https://arxiv.org/abs/2211.01910)
 | [Colab](https://colab.research.google.com/drive/1Hrz6Q7GFdH5OVg3Dis86f5OqiGdkDfRP?usp=sharing)
 | [Demo](https://colab.research.google.com/drive/1oL1CcvzRybAbmeqs--2csaIvSOpjH072?usp=sharing)
@@ -24,19 +23,7 @@ tasks. We conduct extensive qualitative and quantitative analyses to explore the
 APE-engineered prompts can be applied to steer models toward truthfulness and/or informativeness, as well as to improve
 few-shot learning performance by simply prepending them to standard in-context learning prompts.
 
-## Installation
 
-To install APE, simply run:
-
-```
-pip install -e .
-```
-
-And add your OPENAI_API_KEY with the following command:
-
-```
-export OPENAI_API_KEY=YOUR_KEY
-```
 
 ## Using `APE`
 
@@ -108,15 +95,6 @@ the following tokens:
 Datasets in this codebase are represented using separate lists for inputs and outputs. For example, a dataset for words
 and their antonyms can be written as:
 
-```python
-words = ["sane", "direct", "informally", "unpopular", "subtractive", "nonresidential",
-         "inexact", "uptown", "incomparable", "powerful", "gaseous", "evenly", "formality",
-         "deliberately", "off"]
-antonyms = ["insane", "indirect", "formally", "popular", "additive", "residential",
-            "exact", "downtown", "comparable", "powerless", "solid", "unevenly", "informality",
-            "accidentally", "on"]
-data = (words, antonyms)
-```
 
 ### `find_prompts`
 
@@ -164,47 +142,6 @@ samples per prompt per round to `5`.
 
 An example usage of this function would look like:
 
-```python
-from automatic_prompt_engineer import ape
-
-words = ["sane", "direct", "informally", "unpopular", "subtractive", "nonresidential",
-         "inexact", "uptown", "incomparable", "powerful", "gaseous", "evenly", "formality",
-         "deliberately", "off"]
-antonyms = ["insane", "indirect", "formally", "popular", "additive", "residential",
-            "exact", "downtown", "comparable", "powerless", "solid", "unevenly", "informality",
-            "accidentally", "on"]
-            
-eval_template = \
-"""Instruction: [PROMPT]
-Input: [INPUT]
-Output: [OUTPUT]"""
-
-result, demo_fn = ape.simple_ape(
-    dataset=(words, antonyms),
-    eval_template=eval_template,
-)
-```
-
-`find_prompts` returns an evaluation result object and a demo function to allow you to evaluate the quality of the
-selected prompt manually. To get the best prompts and their associated scores from the evaluation result object, use
-the `sorted()` method.
-
-### Cost Estimation
-
-As APE can often be expensive to run, we provide cost estimations for `find_prompts` and `simple_ape`. Simply
-use `ape.estimate_cost` or `ape.simple_estimate_cost` with the same arguments as `find_prompts` and `simple_ape`
-respectively.
-
-## Try it out! :eyes:
-
-We provide a colab notebook for easily using APE:
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Hrz6Q7GFdH5OVg3Dis86f5OqiGdkDfRP?usp=sharing)
-
-We also provide a GUI for easily using APE. Please follow the instructions in the following colab to run it:
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oL1CcvzRybAbmeqs--2csaIvSOpjH072?usp=sharing)
-
 ## Code Strucutre
 
 ```
@@ -223,38 +160,3 @@ We also provide a GUI for easily using APE. Please follow the instructions in th
     |- evaluation
     |- run_instruction_induction.py
     |- run_truthful_qa.py
-- tests: unit tests
-- demo.py: script for launching the GUI
-- demo.ipynb: notebook demonstrating simple_ape
-```
-
-## Reproducing Experiments :test_tube:
-
-To reproduce the experiments from the paper, simply run the scripts in the `experiments` folder. For example, to
-reproduce the experiments for the instruction induction task, run:
-
-`python experiments/run_instruction_induction.py --task=antonyms`
-
-To run the TruthfulQA experiment, run:
-
-`python experiments/run_truthful_qa.py`
-
-## Comments
-
-Our codebase is based on the following repo. Thanks for open-sourcing!
-
-- [Instruction Induction](https://github.com/orhonovich/instruction-induction).
-- [TruthfulQA](https://github.com/sylinrl/TruthfulQA)
-
-## BibTeX
-
-```
-@article{zhou2022large,
-      title={Large Language Models Are Human-Level Prompt Engineers}, 
-      author={Yongchao Zhou and Andrei Ioan Muresanu and Ziwen Han and Keiran Paster and Silviu Pitis and Harris Chan and Jimmy Ba},
-      year={2022},
-      eprint={2211.01910},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-}
-```
